@@ -11,8 +11,8 @@ namespace ADOnet
     {
         public int id { get; set; }
         public string PatienName { get; set; }
-        public string DoctorName{ get; set; }
-     }
+        public string DoctorName { get; set; }
+    }
     class Program
     {
         static void Main(string[] args)
@@ -20,7 +20,7 @@ namespace ADOnet
             List<PatientDoctor> listPd = new List<PatientDoctor>();
             using (SqlConnection connection = new SqlConnection())
             {
-                connection.ConnectionString = @"Data Source=D07\SQLEXPRESS;Initial Catalog=Hospital;Integrated Security=true";
+                connection.ConnectionString = @"Data Source=VAL\SQLEXPRESS;Initial Catalog=Hospital;Integrated Security=true";
                 connection.Open();
 
                 using (var command = connection.CreateCommand())
@@ -37,16 +37,51 @@ namespace ADOnet
                             {
                                 id = (int)reader["PatientId"],
                                 PatienName = reader["PatientName"] != DBNull.Value ? (string)reader["PatientName"] : string.Empty,
-                                DoctorName= reader["DoctorName"] != DBNull.Value ? (string)reader["DoctorName"]: string.Empty
+                                DoctorName = reader["DoctorName"] != DBNull.Value ? (string)reader["DoctorName"] : string.Empty
                             });
                         }
                     }
                 }
             }
-            var group= listPd.select
-            foreach (PatientDoctor item in listPd)
+
+            var group = listPd.GroupBy(x => x.PatienName);
+            foreach (IGrouping<string, PatientDoctor> g in group)
             {
-                Console.WriteLine(item.id +" "+item.PatienName +" \n\t\t"+item.DoctorName );
+                Console.Write(g.Key + "\n");
+                foreach (var t in g)
+                {
+                    Console.Write("\t\t" + t.DoctorName + "\n");
+                }
+            }
+
+            using (SqlConnection connection = new SqlConnection())
+            {
+                connection.ConnectionString = @"Data Source=VAL\SQLEXPRESS;Initial Catalog=Hospital;Integrated Security=true";
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = @"INSERT INTO Patient(Name, Age)
+                                             VALUES ('Viktor', 48);";
+
+                    var write = command.ExecuteNonQuery();
+                    Console.WriteLine(write);
+                }
+            }
+
+
+            using (SqlConnection connection = new SqlConnection())
+            {
+                connection.ConnectionString = @"Data Source=VAL\SQLEXPRESS;Initial Catalog=Hospital;Integrated Security=true";
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = @"DELETE FROM Patient WHERE id=5 ";
+
+                    var write = command.ExecuteNonQuery();
+                    Console.WriteLine(write);
+                }
             }
         }
     }
